@@ -1,0 +1,146 @@
+let deck=[], hand=[], mana=[], shield=[], battle=[];
+let turn=0;
+
+function parseCard(line){
+let [name,cost,color]=line.split("|");
+return {name, cost:Number(cost), color, tap:false};
+}
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+}
+
+function saveDeck(){
+localStorage.setItem("deck", deckText());
+alert("保存しました");
+}
+
+function loadDeck(){
+document.getElementById("deckInput").value=
+localStorage.getItem("deck")||"";
+}
+
+function deckText(){
+return document.getElementById("deckInput").value;
+}
+
+function startGame(){
+deck=deckText().trim().split("\n").map(parseCard);
+shuffle(deck);
+
+hand=[]; mana=[]; shield=[]; battle=[];
+turn=0;
+
+for(let i=0;i<5;i++) shield.push(deck.pop());
+for(let i=0;i<5;i++) hand.push(deck.pop());
+
+updateUI();
+}
+
+function nextTurn(){
+turn++;
+if(deck.length) hand.push(deck.pop());
+aiPlay();
+updateUI();
+}
+
+function autoPlay(){
+let loop=setInterval(()=>{
+if(turn>=10) return clearInterval(loop);
+nextTurn();
+},300);
+}
+
+function aiPlay(){
+
+// マナチャージ
+if(hand.length){
+mana.push(hand.shift());
+}
+
+// 召喚
+for(let card of [...hand]){
+if(canSummon(card)){
+battle.push({...card,tap:true});
+tapMana(card.cost);
+hand.splice(hand.indexOf(card),1);
+}
+}
+
+}
+
+function canSummon(card){
+return mana.filter(m=>!m.tap).length>=card.cost;
+}
+
+function tapMana(cost){
+let used=0;
+for(let m of mana){
+if(!m.tap){
+m.tap=true;
+used++;
+if(used>=cost) break;
+}
+}
+}
+
+function simulate(times){
+let success=0;
+
+for(let i=0;i<times;i++){
+let simDeck=deckText().split("\n").map(parseCard);
+shuffle(simDeck);
+
+let simHand=[];
+let simMana=[];
+
+for(let j=0;j<5;j++) simHand.push(simDeck.pop());
+
+for(let t=0;t<3;t++){
+simHand.push(simDeck.pop());
+simMana.push(simHand.shift());
+}
+
+if(simMana.length>=3) success++;
+}
+
+document.getElementById("result").innerHTML=
+`初動成功率 ${(success/times*100).toFixed(2)}%`;
+}
+
+function analyzeDeck(){
+let lines=deckText().trim().split("\n");
+
+let count=lines.length;
+
+document.getElementById("result").innerHTML=
+`
+枚数: ${count}<br>
+事故率分析準備OK
+`;
+}
+
+function updateUI(){
+
+document.getElementById("turn").innerText="ターン:"+turn;
+
+render("hand",hand);
+render("mana",mana);
+render("battle",battle);
+render("shield",shield);
+}
+
+function render(id,array){
+let div=document.getElementById(id);
+div.innerHTML="";
+
+array.forEach(c=>{
+let el=document.createElement("div");
+el.className="card";
+el.innerText=c.name;
+div.appendChild(el);
+});
+}

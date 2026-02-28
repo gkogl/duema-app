@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>デュエマ調整アプリ PRO</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>デュエマ調整アプリ PRO</h1>
+
+<div class="panel">
+<h3>デッキビルダー</h3>
+<textarea id="deckInput" placeholder="カード名|コスト|文明"></textarea>
+<br>
+<button onclick="saveDeck()">デッキ保存</button>
+<button onclick="loadDeck()">読み込み</button>
+<button onclick="analyzeDeck()">統計</button>
+</div>
+
+<div class="panel">
+<button onclick="startGame()">ゲーム開始</button>
+<button onclick="autoPlay()">AI回し</button>
+<button onclick="simulate(10000)">1万回シミュ</button>
+<button onclick="simulate(100000)">10万回シミュ</button>
+</div>
+
+<h2 id="turn">ターン:0</h2>
+
+<div class="zone">
+<h3>シールド</h3>
+<div id="shield"></div>
+</div>
+
+<div class="zone">
+<h3>手札</h3>
+<div id="hand"></div>
+</div>
+
+<div class="zone">
+<h3>マナ</h3>
+<div id="mana"></div>
+</div>
+
+<div class="zone">
+<h3>バトルゾーン</h3>
+<div id="battle"></div>
+</div>
+
+<div class="zone">
+<h3>結果 / 統計</h3>
+<div id="result"></div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
